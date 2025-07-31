@@ -10,9 +10,6 @@
 [submodule "ext/imgui"]
 	path = ext/imgui
 	url = https://github.com/ocornut/imgui
-[submodule "ext/json"]
-	path = ext/json
-	url = https://github.com/nlohmann/json.git
 [submodule "ext/rapidjson"]
 	path = ext/rapidjson
 	url = https://github.com/Tencent/rapidjson/
