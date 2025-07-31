@@ -1,0 +1,30 @@
+{
+  "aabb_min": [-2,-2,-2],
+  "aabb_max": [2,2,2],
+  "nodeType": "binaryOperator",
+  "blendMode": "sub",
+  "blendRadius": 0.1,
+  "matrix": [
+    1, 0, 0, 0,
+    0, 0.866, 0.5, 0,
+    0, -0.5, 0.866, 0 ],
+  "leftChild": {
+    "nodeType": "primitive",
+    "matrix": [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0 ],
+    "primitiveType": "sphere",
+    "radius": 1,
+    "round_x": 0,
+    "round_y": 0,
+    "color": [1,0,0]
+  },
+  "rightChild": {
+    "nodeType": "primitive",
+    "matrix": [ 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0 ],
+    "primitiveType": "cylinder",
+    "height": 2,
+    "radius": 0.5,
+    "round_x": 0,
+    "round_y": 0,
+    "color": [0,1,0]
+  }
+}
