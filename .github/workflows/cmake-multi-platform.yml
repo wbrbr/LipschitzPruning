@@ -82,6 +82,7 @@ jobs:
       - name: Install Vulkan SDK
         run: |
           curl -O https://sdk.lunarg.com/sdk/download/latest/windows/vulkan_sdk.exe
+          ls
           vulkan_sdk.exe --accept-licenses --default-answer --confirm-command install
 
       - name: Set reusable strings
