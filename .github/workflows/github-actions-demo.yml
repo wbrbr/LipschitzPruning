@@ -1,0 +1,11 @@
+name: Build
+run-name: Build Ubuntu
+on: push
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - mkdir build
+      - cd build
+      - cmake .. -GNinja
+      - ninja
