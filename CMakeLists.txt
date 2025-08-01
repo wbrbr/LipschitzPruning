@@ -18,17 +18,19 @@ FetchContent_Declare(
         GIT_TAG "v2.5.0"
 
 )
-
-#FetchContent_Declare(
-#    glfw
-#    GIT_REPOSITORY "https://github.com/glfw/glfw"
-#    GIT_TAG 3.4
-#)
-
-find_package(glfw3 REQUIRED)
-
 FetchContent_MakeAvailable(CLI11)
-#FetchContent_MakeAvailable(glfw)
+
+find_package(glfw3)
+if (NOT ${glfw3_FOUND})
+    FetchContent_Declare(
+            glfw
+            GIT_REPOSITORY "https://github.com/glfw/glfw"
+            GIT_TAG 3.4
+    )
+    FetchContent_MakeAvailable(glfw)
+endif()
+
+
 
 set(SHADER_SRCS
         simple.vert.glsl
