@@ -41,8 +41,7 @@ jobs:
             c_compiler: cl
 
     steps:
-      - uses:
-        - actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Checkout submodules
         run: cd ${{ github.workspace }} && git submodule update --init --recursive
