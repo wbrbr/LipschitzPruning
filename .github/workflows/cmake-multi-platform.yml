@@ -43,6 +43,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download SDK
+        run: cd ${{ github.workspace }} && ./scripts/setup_vulkan_sdk.sh
+
       - name: Checkout submodules
         run: cd ${{ github.workspace }} && git submodule update --init --recursive
 
