@@ -708,6 +708,18 @@ int recreate_swapchain(Init& init, RenderData& data) {
         init.disp.destroyFramebuffer(framebuffer, nullptr);
     }
 
+    {
+        int width = 0;
+        int height = 0;
+        // wait while window is minimized
+        glfwGetFramebufferSize(init.window, &width, &height);
+        while (width == 0 && height == 0) {
+            glfwGetFramebufferSize(init.window, &width, &height);
+            glfwWaitEvents();
+        }
+        init.disp.deviceWaitIdle();
+    }
+
     init.swapchain.destroy_image_views(data.swapchain_image_views);
 
     if (0 != create_swapchain(init, data)) return -1;
