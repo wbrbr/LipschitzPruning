@@ -5,7 +5,7 @@ jobs:
   ubuntu:
     runs-on: ubuntu-latest
     steps:
-      - mkdir build
-      - cd build
-      - cmake .. -GNinja
-      - ninja
+      - run: mkdir build
+      - run: cd build
+      - run: cmake .. -GNinja
+      - run: ninja
