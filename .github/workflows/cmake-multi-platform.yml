@@ -47,7 +47,7 @@ jobs:
         run: cd ${{ github.workspace }} && git submodule update --init --recursive
 
       - name: Install Vulkan
-        run: apt install libvulkan-dev libvulkan-memory-allocator-dev glslc
+        run: sudo apt install libvulkan-dev libvulkan-memory-allocator-dev glslc
 
       #- name: Fetch Vulkan SDK version
       #  id: vk
