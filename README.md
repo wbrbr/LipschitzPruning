@@ -15,3 +15,9 @@ cd build
 cmake ..
 cmake --build .
 ```
+
+## Run
+
+The executable should be run from the `build` folder. Examples:
+* Linux build: `./LipschitzPruning`
+* Windows build (Debug): `Debug\LipschitzPruning.exe`
