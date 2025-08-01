@@ -70,7 +70,7 @@ foreach(src_file bin_file stage IN ZIP_LISTS SHADER_SRCS SHADER_BINS SHADER_STAG
     add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/${bin_file}" COMMAND glslc ARGS -fshader-stage=${stage} --target-spv=spv1.3 -g ${CMAKE_SOURCE_DIR}/shaders/${src_file} -o ${CMAKE_BINARY_DIR}/${bin_file} MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/shaders/${src_file} DEPENDS ${CMAKE_SOURCE_DIR}/shaders/common.glsl ${CMAKE_SOURCE_DIR}/shaders/common_culling.glsl ${CMAKE_SOURCE_DIR}/include/constants.h)
 endforeach()
 
-include_directories(PRIVATE include/ ext/imgui ext/json/include ext/rapidjson/include)
+include_directories(PRIVATE include/ ext/imgui ext/json/include ext/rapidjson/include ext/glm)
 link_libraries(glfw vk-bootstrap Vulkan::Vulkan CLI11::CLI11)
 
 add_executable(LipschitzPruning src/main.cpp ${SHARED_SRC})
