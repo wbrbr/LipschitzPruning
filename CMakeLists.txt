@@ -5,6 +5,9 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(ext/vk-bootstrap)
 
+if (NOT DEFINED ENV{VULKAN_SDK})
+    set(ENV{VULKAN_SDK} ${CMAKE_SOURCE_DIR}/sdk)
+endif()
 find_package(Vulkan REQUIRED)
 
 include(FetchContent)
