@@ -5,7 +5,7 @@ name: CMake on multiple platforms
 on: push
 
 jobs:
-  build:
+  build-ubuntu:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -19,7 +19,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: ubuntu-latest
         build_type: [Release]
         c_compiler: [gcc, clang, cl]
         include:
@@ -46,18 +46,8 @@ jobs:
       - name: Checkout submodules
         run: cd ${{ github.workspace }} && git submodule update --init --recursive
 
-      - name: Install Vulkan
+      - name: Install dependencies
         run: sudo apt install libvulkan-dev libvulkan-memory-allocator-dev glslc libglfw3-dev
-
-      #- name: Fetch Vulkan SDK version
-      #  id: vk
-      #  run: echo "version=$(curl -s https://vulkan.lunarg.com/sdk/latest/linux.txt)" >> $GITHUB_OUTPUT
-
-      #- name: Install Vulkan SDK
-      #  run: |
-      #    curl -O https://sdk.lunarg.com/sdk/download/latest/linux/vulkan_sdk.tar.xz
-      #    tar xf vulkan_sdk.tar.xz
-          
 
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -79,3 +69,34 @@ jobs:
       - name: Build
         # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout submodules
+        run: cd ${{ github.workspace }} && git submodule update --init --recursive
+
+      - name: Install Vulkan SDK
+        run: curl -O https://sdk.lunarg.com/sdk/download/latest/windows/vulkan_sdk.exe
+
+      - name: Set reusable strings
+        # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+      - name: Configure CMake
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+        run: >
+          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_BUILD_TYPE=Release
+          -S ${{ github.workspace }}
+
+      - name: Build
+        # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
