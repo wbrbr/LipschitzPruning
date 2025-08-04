@@ -83,9 +83,6 @@ jobs:
         id: vk
         shell: bash
         run: echo "version=$(curl -s https://vulkan.lunarg.com/sdk/latest/windows.txt)" >> "$GITHUB_OUTPUT"
-
-      - name: print Vulkan SDK version
-        run: echo "Vulkan SDK version is ${{ steps.vk.outputs.version }}"
       
       - name: Install Vulkan SDK
         run: |
