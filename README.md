@@ -22,7 +22,7 @@ Rendering tree-based analytical Signed Distance Fields (SDFs) through sphere tra
 
 ## Prebuilt executables
 
-Windows executables are available as releases. The executable should be run from the `bin` subdirectory:
+Windows executables are available as [releases](https://github.com/wbrbr/LipschitzPruning/releases). The executable should be run from the `bin` subdirectory:
 ```
 cd bin
 LipschitzPruning.exe
