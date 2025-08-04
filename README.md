@@ -6,11 +6,30 @@ Wilhem Barbier*, Mathieu Sanchez*, Axel Paris, Élie Michel, Thibaud Lambert, Ta
 
 ![Teaser](img/teaser.jpg)
 
-[**Project page**](https://wbrbr.org/publications/LipschitzPruning)
+🌐 [**Project page**](https://wbrbr.org/publications/LipschitzPruning)
+
+📰 *Computer Graphics Forum* (Eurographics 2025)
+
+🏆 Best Paper award: Honorable mention
+
+📢 Presented at **SIGGRAPH 2025**
+
+
 
 ## Abstract
 
- Rendering tree-based analytical Signed Distance Fields (SDFs) through sphere tracing often requires to evaluate many primitives per tracing step, for many steps per pixel of the end image. This cost quickly becomes prohibitive as the number of primitives that constitute the SDF grows. In this paper, we alleviate this cost by computing local pruned trees that are equivalent to the full tree within their region of space while being much faster to evaluate. We introduce an efficient hierarchical tree pruning method based on the Lipschitz property of SDFs, which is compatible with hard and smooth CSG operators. We propose a GPU implementation that enables real-time sphere tracing of complex SDFs composed of thousands of primitives with dynamic animation. Our pruning technique provides significant speedups for SDF evaluation in general, which we demonstrate on sphere tracing tasks but could also lead to significant improvements for SDF discretization or polygonization. 
+Rendering tree-based analytical Signed Distance Fields (SDFs) through sphere tracing often requires to evaluate many primitives per tracing step, for many steps per pixel of the end image. This cost quickly becomes prohibitive as the number of primitives that constitute the SDF grows. In this paper, we alleviate this cost by computing local pruned trees that are equivalent to the full tree within their region of space while being much faster to evaluate. We introduce an efficient hierarchical tree pruning method based on the Lipschitz property of SDFs, which is compatible with hard and smooth CSG operators. We propose a GPU implementation that enables real-time sphere tracing of complex SDFs composed of thousands of primitives with dynamic animation. Our pruning technique provides significant speedups for SDF evaluation in general, which we demonstrate on sphere tracing tasks but could also lead to significant improvements for SDF discretization or polygonization. 
+
+## Prebuilt executables
+
+Windows executables are available as releases. The executable should be run from the `bin` subdirectory:
+```
+cd bin
+LipschitzPruning.exe
+```
+
+
+# Build from source
 
 ## Dependencies
 
@@ -18,7 +37,7 @@ Wilhem Barbier*, Mathieu Sanchez*, Axel Paris, Élie Michel, Thibaud Lambert, Ta
 
 ## Build
 
-* Install the Vulkan SDK. (Ubuntu instructions: `apt install libvulkan-dev libvulkan-memory-allocator-dev glslc libglfw3-dev`)
+* Install the Vulkan SDK. (Ubuntu 24.04 instructions: `apt install libvulkan-dev libvulkan-memory-allocator-dev glslc libglfw3-dev`)
 * Fetch the submodules: `git submodule update --init --recursive`
 * Build:
 ```
