@@ -19,11 +19,11 @@ float sdf(vec3 p) {
             d = s*(min(s*left_val, s*right_val) - kernel(abs(left_val-right_val), k));
         } else if (node.type == NODETYPE_PRIMITIVE) {
             Primitive prim = prims.tab[node.idx_in_type];
-            d = eval_prim2(p, prim);
+            d = eval_prim(p, prim);
         }
 
         if (stack_idx >= STACK_DEPTH) {
-            debugPrintfEXT("Stack overflow\n");
+            //debugPrintfEXT("Stack overflow\n");
             return 1.0 / 0.0;
         }
         stack[stack_idx++] = d;
@@ -63,12 +63,12 @@ float sdf_active(vec3 p, int cell_idx, out bool near_field) {
             d = s*(min(s*left_val, s*right_val)-kernel(abs(left_val-right_val), k));
         } else if (node.type == NODETYPE_PRIMITIVE) {
             Primitive prim = prims.tab[node.idx_in_type];
-            d = eval_prim2(p, prim);
+            d = eval_prim(p, prim);
         }
 
         d *= ActiveNode_sign(active_node) ? 1 : -1;
         if (stack_idx >= STACK_DEPTH) {
-            debugPrintfEXT("Stack overflow\n");
+            //debugPrintfEXT("Stack overflow\n");
             return 1.0 / 0.0;
         }
         stack[stack_idx++] = d;

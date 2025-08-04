@@ -116,7 +116,7 @@ void compute_pruning(vec3 cell_center, vec3 cell_size, int cell_idx) {
                 //prim_dist[i] = 1e20;
             } else if (node.type == NODETYPE_PRIMITIVE) {
                 Primitive prim = prims.tab[node.idx_in_type];
-                d = eval_prim2(cell_center, prim);
+                d = eval_prim(cell_center, prim);
                 tmp.tab[tmp_offset + 32*i + gl_SubgroupInvocationID] = Tmp(0);
                 Tmp_state_write(tmp.tab[tmp_offset + 32*i + gl_SubgroupInvocationID], NODESTATE_ACTIVE);
                 //prim_dist[i] = d;

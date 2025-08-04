@@ -89,7 +89,7 @@ vec3 get_color_active(vec3 p, int cell_idx) {
             albedo = mix(left_entry.col, right_entry.col, v.y);
         } else if (node.type == NODETYPE_PRIMITIVE) {
             Primitive prim = prims.tab[node.idx_in_type];
-            d = eval_prim2(p, prim);
+            d = eval_prim(p, prim);
             float r = float((prim.color >> 0) & 0xff) / 255.f;
             float g = float((prim.color >> 8) & 0xff) / 255.f;
             float b = float((prim.color >> 16) & 0xff) / 255.f;
@@ -98,7 +98,7 @@ vec3 get_color_active(vec3 p, int cell_idx) {
 
         d *= ActiveNode_sign(active_node) ? 1 : -1;
         if (stack_idx >= STACK_DEPTH) {
-            debugPrintfEXT("Stack overflow\n");
+            //debugPrintfEXT("Stack overflow\n");
             return vec3(0);
         }
         stack[stack_idx++] = StackEntry(d, albedo);
@@ -139,7 +139,7 @@ vec3 get_color(vec3 p) {
             albedo = mix(left_entry.col, right_entry.col, v.y);
         } else if (node.type == NODETYPE_PRIMITIVE) {
             Primitive prim = prims.tab[node.idx_in_type];
-            d = eval_prim2(p, prim);
+            d = eval_prim(p, prim);
             float r = float((prim.color >> 0) & 0xff) / 255.f;
             float g = float((prim.color >> 8) & 0xff) / 255.f;
             float b = float((prim.color >> 16) & 0xff) / 255.f;
@@ -147,7 +147,7 @@ vec3 get_color(vec3 p) {
         }
 
         if (stack_idx >= STACK_DEPTH) {
-            debugPrintfEXT("Stack overflow\n");
+            //debugPrintfEXT("Stack overflow\n");
             return vec3(0);
         }
         stack[stack_idx++] = StackEntry(d, albedo);

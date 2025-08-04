@@ -313,13 +313,8 @@ void init_pcg(inout PCG pcg, const uint64_t seed)
 
 float rand_float_0_1(inout PCG pcg) { return rand_uint32(pcg) * 2.32830616e-10f; }
 
-float sdRoundedBox2D( in vec2 p, in vec2 b, in float r )
-{
-    vec2 q = abs(p)-b+r;
-    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r;
-}
 
-float sdRoundBox2( in vec2 p, in vec2 b, in vec4 r )
+float sdRoundBox( in vec2 p, in vec2 b, in vec4 r )
 {
     r.xy = (p.x>0.0)?r.xy : r.zw;
     r.x  = (p.y>0.0)?r.x  : r.y;
@@ -328,35 +323,11 @@ float sdRoundBox2( in vec2 p, in vec2 b, in vec4 r )
 }
 
 
-float sdExtrude2( in float d, float z, in float h, float r ) {
+float sdExtrude( in float d, float z, in float h, float r ) {
     vec2 q = vec2(d+r, abs(z)-h);
     return min(max(q.x, q.y), 0.0) + length(max(q, 0.0))-r;
 }
 
-#if 0
-float sdCone( vec3 p, vec2 c, float h )
-{
-  float q = length(p.xz);
-  return max(dot(c.xy,vec2(q,p.y)),-h-p.y);
-}
-#endif
-#if 0
-float sdCone( vec3 p, vec2 c, float h )
-{
-    // c is the sin/cos of the angle, h is height
-    // Alternatively pass q instead of (c,h),
-    // which is the point at the base in 2D
-    vec2 q = h*vec2(c.x/c.y,-1.0);
-
-    vec2 w = vec2( length(p.xz), p.y );
-    vec2 a = w - q*clamp( dot(w,q)/dot(q,q), 0.0, 1.0 );
-    vec2 b = w - q*vec2( clamp( w.x/q.x, 0.0, 1.0 ), 1.0 );
-    float k = sign( q.y );
-    float d = min(dot( a, a ),dot(b, b));
-    float s = max( k*(w.x*q.y-w.y*q.x),k*(w.y-q.y)  );
-    return sqrt(d)*sign(s);
-}
-#endif
 
 float sdCone(vec3 position, float radius, float halfHeight) {
     vec2 p = vec2(length(position.xz) - radius, position.y + halfHeight);
@@ -369,7 +340,7 @@ float sdCone(vec3 position, float radius, float halfHeight) {
     return -min(d, p.y);
 }
 
-float eval_prim2(vec3 p, Primitive prim) {
+float eval_prim(vec3 p, Primitive prim) {
     mat4x3 m = transpose(mat3x4(prim.m_row0, prim.m_row1, prim.m_row2));
     p = vec3(m * vec4(p, 1));
 
@@ -379,7 +350,6 @@ float eval_prim2(vec3 p, Primitive prim) {
         dist = length(p) - r;
     } else if (prim.type == PRIMITIVE_BOX) {
         vec3 half_sides = prim.data.xyz * 0.5;
-        //float d_2D = sdRoundedBox2D(p.xz, half_sides.xz, max(0, prim.bevel-prim.rounding));
         float scale = max(half_sides.x, half_sides.z) * 2;
         uint corner_data = floatBitsToUint(prim.data.w);
         vec4 corner_rounding;
@@ -389,15 +359,10 @@ float eval_prim2(vec3 p, Primitive prim) {
         corner_rounding.w = float((corner_data >> 24) & 0xff);
         corner_rounding = corner_rounding * scale / 255.f;
         corner_rounding /= 2;
-        //corner_rounding = vec4(0, half_sides.x, 0, half_sides.x);
-        float d_2D = sdRoundBox2(p.xz, half_sides.xz, corner_rounding);
-        //float d_2D = sdRoundedBox2D(p.xz, half_sides.xz, 0);
+        float d_2D = sdRoundBox(p.xz, half_sides.xz, corner_rounding);
 
         float er = p.y > 0 ? prim.extrude_rounding.x : prim.extrude_rounding.y;
-        dist = sdExtrude2( d_2D, p.y, half_sides.y-er, er );
-        /*vec2 w = vec2( d_2D + 0.1*prim.rounding, abs(p.y) - half_sides.y );
-        dist = min(max(w.x,w.y),0.0) + length(max(w,0.0));
-        dist -= 0.1*prim.rounding;*/
+        dist = sdExtrude( d_2D, p.y, half_sides.y-er, er );
     } else if (prim.type == PRIMITIVE_CYLINDER) {
         float h = prim.data.x / 2;
         float r = prim.data.y;
