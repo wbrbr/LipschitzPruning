@@ -2,6 +2,8 @@ import os.path
 import shutil
 import glob
 
+os.system('cmake --build . --config Release')
+
 PKG_DIR = 'LipschitzPruning'
 
 if os.path.exists(PKG_DIR):
