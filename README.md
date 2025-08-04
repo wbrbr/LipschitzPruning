@@ -52,3 +52,9 @@ cmake --build .
 The executable should be run from the `build` folder. Examples:
 * Linux build: `./LipschitzPruning`
 * Windows build (Debug): `Debug\LipschitzPruning.exe`
+
+
+# Assets
+All the assets contained in the `scenes/` are courtesy of Élie Michel and available under the CC-BY 4.0 licence (Creative Commons with attribution).
+
+![CC-BY logo](img/cc-by.svg)
