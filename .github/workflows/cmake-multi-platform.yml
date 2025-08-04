@@ -79,6 +79,10 @@ jobs:
       - name: Checkout submodules
         run: cd ${{ github.workspace }} && git submodule update --init --recursive
 
+      - name: Fetch Vulkan SDK version
+        id: vk
+        run: echo "version=$(curl https://vulkan.lunarg.com/sdk/latest/windows.txt)" >> $GITHUB_OUTPUT
+      
       - name: Install Vulkan SDK
         run: |
           curl -O https://sdk.lunarg.com/sdk/download/latest/windows/vulkan_sdk.exe
@@ -96,7 +100,7 @@ jobs:
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
         # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
         run: >
-          $env:VULKAN_SDK='C:\VulkanSDK\1.4.321.1';
+          $env:VULKAN_SDK='C:\VulkanSDK\${{ steps.vk.outputs.version }}';
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
           -DCMAKE_BUILD_TYPE=Release
           -S ${{ github.workspace }}
