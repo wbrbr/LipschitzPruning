@@ -17,7 +17,6 @@ struct Timings {
 struct GPUNode {
     NodeType type;
     int idx_in_type;
-    int is_left, must_push;
 };
 
 class Context {
@@ -34,7 +33,7 @@ public:
 };
 
 void create_culling_pipelines(Init& init, RenderData& render_data);
-int ConvertToGPUTree(int root_idx, bool is_left, bool must_push, const std::vector<CSGNode>& csg_nodes, std::vector<GPUNode>& gpu_nodes, std::vector<Primitive>& primitives, std::vector<BinaryOp>& binary_ops, std::vector<uint16_t>& parent, std::vector<uint16_t>& active_nodes);
+int ConvertToGPUTree(int root_idx, const std::vector<CSGNode>& csg_nodes, std::vector<GPUNode>& gpu_nodes, std::vector<Primitive>& primitives, std::vector<BinaryOp>& binary_ops, std::vector<uint16_t>& parent, std::vector<uint16_t>& active_nodes);
 void UploadGPUTree(const std::vector<BinaryOp>& binary_ops, const std::vector<GPUNode>& gpu_nodes, const std::vector<Primitive>& primitives, const std::vector<uint16_t>& parent, const std::vector<uint16_t>& active_nodes, RenderData& render_data, Init& init);
 
 

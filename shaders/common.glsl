@@ -22,7 +22,6 @@ struct Primitive {
 struct Node {
     int type;
     int idx_in_type;
-    int is_left, must_push;
 };
 
 struct BinaryOp {

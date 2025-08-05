@@ -1339,7 +1339,7 @@ int MakeLeftHeavy(int idx, std::vector<CSGNode>& csg_nodes) {
 }
 #endif
 
-int ConvertToGPUTree(int root_idx, bool is_left, bool must_push, const std::vector<CSGNode>& csg_nodes, std::vector<GPUNode>& gpu_nodes, std::vector<Primitive>& primitives, std::vector<BinaryOp>& binary_ops, std::vector<uint16_t>& parent, std::vector<uint16_t>& active_nodes) {
+int ConvertToGPUTree(int root_idx, const std::vector<CSGNode>& csg_nodes, std::vector<GPUNode>& gpu_nodes, std::vector<Primitive>& primitives, std::vector<BinaryOp>& binary_ops, std::vector<uint16_t>& parent, std::vector<uint16_t>& active_nodes) {
 
     std::vector<int> cpu_to_gpu(csg_nodes.size());
     std::vector<int> stack = { root_idx };
@@ -1369,8 +1369,6 @@ int ConvertToGPUTree(int root_idx, bool is_left, bool must_push, const std::vect
                 GPUNode gpu_node = {
                         .type = node.type,
                         .idx_in_type = (int)binary_ops.size() - 1,
-                        .is_left = is_left ? 1 : 0,
-                        .must_push = must_push ? 1 : 0
                 };
                 gpu_nodes.push_back(gpu_node);
                 parent[gpu_left] = (uint16_t)gpu_nodes.size() - 1;
@@ -1384,8 +1382,6 @@ int ConvertToGPUTree(int root_idx, bool is_left, bool must_push, const std::vect
                 GPUNode gpu_node = {
                         .type = node.type,
                         .idx_in_type = (int)primitives.size() - 1,
-                        .is_left = is_left ? 1 : 0,
-                        .must_push = must_push ? 1 : 0
                 };
                 gpu_nodes.push_back(gpu_node);
                 parent.push_back(0xffff);
@@ -1515,7 +1511,7 @@ void UploadScene(const std::vector<CSGNode>& csg_tree, int root_idx, Init& init,
     std::vector<Primitive> primitives;
     std::vector<uint16_t> parent;
     std::vector<uint16_t> active_nodes;
-    int gpu_root_idx = ConvertToGPUTree(root_idx, true, false, csg_tree, gpu_tree, primitives, binary_ops, parent, active_nodes);
+    int gpu_root_idx = ConvertToGPUTree(root_idx, csg_tree, gpu_tree, primitives, binary_ops, parent, active_nodes);
 
     UploadGPUTree(binary_ops, gpu_tree, primitives, parent, active_nodes, render_data, init);
 }
@@ -1530,7 +1526,7 @@ void UploadAnim(const std::vector<std::vector<CSGNode>>& csg_trees, const std::v
     std::vector<std::vector<uint16_t>> parents(num_frames);
     std::vector<std::vector<uint16_t>> active_nodes(num_frames);
     for (int i = 0; i < num_frames; i++) {
-        gpu_root_indices[i] = ConvertToGPUTree(root_indices[i], true, false, csg_trees[i], gpu_trees[i], prims[i], binary_ops[i], parents[i], active_nodes[i]);
+        gpu_root_indices[i] = ConvertToGPUTree(root_indices[i], csg_trees[i], gpu_trees[i], prims[i], binary_ops[i], parents[i], active_nodes[i]);
     }
 }
 
