@@ -8,9 +8,9 @@ Wilhem Barbier*, Mathieu Sanchez*, Axel Paris, Élie Michel, Thibaud Lambert, Ta
 
 🌐 [**Project page**](https://wbrbr.org/publications/LipschitzPruning)
 
-📰 *Computer Graphics Forum* (Eurographics 2025)
+📰 Published in *Computer Graphics Forum* (Eurographics 2025)
 
-🏆 Best Paper award: Honorable mention
+🏆 Received an Honorable Mention for the Best Paper award
 
 📢 Presented at **SIGGRAPH 2025**
 
