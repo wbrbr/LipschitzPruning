@@ -58,3 +58,5 @@ The executable should be run from the `build` folder. Examples:
 The *Trees* and *Monument* scenes are courtesy of Élie Michel and available under the CC-BY 4.0 licence (Creative Commons with attribution).
 
 ![CC-BY logo](img/cc-by.svg)
+
+The *Molecule* scene is borrowed from the paper [Segment Tracing Using Local Lipschitz Bounds](https://aparis69.github.io/public_html/projects/galin2020_Segment.html) by Galin et al.
