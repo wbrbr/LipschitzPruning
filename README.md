@@ -55,6 +55,6 @@ The executable should be run from the `build` folder. Examples:
 
 
 # Assets
-All the assets contained in the `scenes/` are courtesy of Élie Michel and available under the CC-BY 4.0 licence (Creative Commons with attribution).
+The *Trees* and *Monument* scenes are courtesy of Élie Michel and available under the CC-BY 4.0 licence (Creative Commons with attribution).
 
 ![CC-BY logo](img/cc-by.svg)
