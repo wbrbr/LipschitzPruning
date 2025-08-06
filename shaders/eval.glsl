@@ -1,5 +1,5 @@
 float sdf(vec3 p) {
-    const int STACK_DEPTH = 32;
+    const int STACK_DEPTH = 128;
     float stack[STACK_DEPTH];
     int stack_idx = 0;
 
@@ -41,7 +41,7 @@ float sdf_active(vec3 p, int cell_idx, out bool near_field) {
         return cell_error_out.tab[cell_idx];
     }
 
-    const int STACK_DEPTH = 32;
+    const int STACK_DEPTH = 128;
     float stack[STACK_DEPTH];
     int stack_idx = 0;
 

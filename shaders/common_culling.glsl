@@ -10,7 +10,7 @@ void compute_pruning(vec3 cell_center, vec3 cell_size, int cell_idx) {
         int idx;
         float d;
     };
-    const int STACK_DEPTH = 32;
+    const int STACK_DEPTH = 128;
     StackEntry stack[STACK_DEPTH];
     int stack_idx = 0;
 

@@ -57,7 +57,7 @@ vec3 get_color_active(vec3 p, int cell_idx) {
         return vec3(0);
     }
 
-    const int STACK_DEPTH = 32;
+    const int STACK_DEPTH = 128;
 
     struct StackEntry {
         float d;
@@ -108,7 +108,7 @@ vec3 get_color_active(vec3 p, int cell_idx) {
 }
 
 vec3 get_color(vec3 p) {
-    const int STACK_DEPTH = 32;
+    const int STACK_DEPTH = 128;
 
     struct StackEntry {
         float d;
