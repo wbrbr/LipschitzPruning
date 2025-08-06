@@ -320,6 +320,22 @@ int main(int argc, char** argv) {
 
         ImGui::SliderFloat("Gamma", &ctx.render_data.gamma, 1, 4);
 
+#if 1
+        ImGui::SeparatorText("Shader statistics");
+        if (ImGui::TreeNode("Pruning shader")) {
+            char pipeline_stats[4096];
+            get_pipeline_stats(ctx.init, ctx.render_data.culling_pipeline.pipe, 0, pipeline_stats, 4096);
+            ImGui::Text("%s", pipeline_stats);
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Fragment shader")) {
+            char pipeline_stats[4096];
+            get_pipeline_stats(ctx.init, ctx.render_data.graphics_pipeline, 1, pipeline_stats, 4096);
+            ImGui::Text("%s", pipeline_stats);
+            ImGui::TreePop();
+        }
+#endif
+
 #if 0
         if (ImGui::Button("Copy command")) {
             char command[1024];

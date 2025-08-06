@@ -319,7 +319,7 @@ int create_render_pass(Init& init, RenderData& data) {
     return 0;
 }
 
-static void print_pipeline_stats(Init& init, VkPipeline pipeline, uint32_t executable_idx) {
+void get_pipeline_stats(Init& init, VkPipeline pipeline, uint32_t executable_idx, char* buf, uint32_t buf_size) {
     VkPipelineExecutableInfoKHR info = {
         .sType = VK_STRUCTURE_TYPE_PIPELINE_EXECUTABLE_INFO_KHR,
         .pNext = nullptr,
@@ -336,28 +336,37 @@ static void print_pipeline_stats(Init& init, VkPipeline pipeline, uint32_t execu
     VK_CHECK(init.disp.getPipelineExecutableStatisticsKHR(&info, &num_stats, stats));
 
     for (uint32_t i = 0; i < num_stats; i++) {
-        printf("%s\n%s: ", stats[i].description, stats[i].name);
+        int n = snprintf(buf, buf_size, "%s\n%s: ", stats[i].description, stats[i].name);
+        assert(n > 0);
+        buf += n;
+        buf_size -= n;
         switch (stats[i].format) {
             case VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_BOOL32_KHR:
                 if (stats[i].value.b32) { printf("TRUE"); } else { printf("FALSE"); }
                 break;
 
             case VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_INT64_KHR:
-                printf("%li", stats[i].value.i64);
+                n = snprintf(buf, buf_size, "%li", stats[i].value.i64);
                 break;
 
             case VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_UINT64_KHR:
-                printf("%lu", stats[i].value.u64);
+                n = snprintf(buf, buf_size, "%lu", stats[i].value.u64);
                 break;
 
             case VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_FLOAT64_KHR:
-                printf("%lf", stats[i].value.f64);
+                n = snprintf(buf, buf_size, "%lf", stats[i].value.f64);
                 break;
 
             default:
                 abort();
         }
-        printf("\n\n");
+        assert(n > 0);
+        buf += n;
+        buf_size -= n;
+        n = snprintf(buf, buf_size, "\n\n");
+        assert(n > 0);
+        buf += n;
+        buf_size -= n;
     }
 }
 
@@ -533,11 +542,6 @@ int create_graphics_pipeline(Init& init, RenderData& data) {
         return -1; // failed to create graphics pipeline
     }
 
-    {
-        puts("=== Graphics pipeline statistics ===");
-        print_pipeline_stats(init, data.graphics_pipeline, 1);
-    }
-
     init.disp.destroyShaderModule(frag_module, nullptr);
     init.disp.destroyShaderModule(vert_module, nullptr);
     return 0;
@@ -584,11 +588,6 @@ Pipeline create_culling_pipeline(Init& init, RenderData& render_data, const char
             .basePipelineIndex = -1
     };
     VK_CHECK(vkCreateComputePipelines(init.device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &pipeline.pipe));
-
-    {
-        puts("=== Culling pipeline statistics ===");
-        print_pipeline_stats(init, pipeline.pipe, 0);
-    }
 
     return pipeline;
 }

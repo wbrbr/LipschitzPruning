@@ -36,6 +36,7 @@ void create_culling_pipelines(Init& init, RenderData& render_data);
 int create_graphics_pipeline(Init& init, RenderData& data);
 int ConvertToGPUTree(int root_idx, const std::vector<CSGNode>& csg_nodes, std::vector<GPUNode>& gpu_nodes, std::vector<Primitive>& primitives, std::vector<BinaryOp>& binary_ops, std::vector<uint16_t>& parent, std::vector<uint16_t>& active_nodes);
 void UploadGPUTree(const std::vector<BinaryOp>& binary_ops, const std::vector<GPUNode>& gpu_nodes, const std::vector<Primitive>& primitives, const std::vector<uint16_t>& parent, const std::vector<uint16_t>& active_nodes, RenderData& render_data, Init& init);
+void get_pipeline_stats(Init& init, VkPipeline pipeline, uint32_t executable_idx, char* buf, uint32_t buf_size);
 
 
 #endif //SDFCULLING_CONTEXT_H
