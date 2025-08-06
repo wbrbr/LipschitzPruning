@@ -118,11 +118,16 @@ int device_initialization(Init& init, bool gui) {
     features12.bufferDeviceAddress = true;
     features12.hostQueryReset = true;
     features12.storagePushConstant8 = true;
+    features12.shaderFloat16 = true;
 
     VkPhysicalDeviceVulkan13Features features13{};
     features13.synchronization2 = true;
     features13.dynamicRendering = true;
 
+    VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR pipeline_exec_properties_features{};
+    pipeline_exec_properties_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR;
+    pipeline_exec_properties_features.pNext = nullptr;
+    pipeline_exec_properties_features.pipelineExecutableInfo = true;
 
     vkb::PhysicalDeviceSelector phys_device_selector(init.instance);
     if (gui) phys_device_selector.set_surface(init.surface);
@@ -134,6 +139,8 @@ int device_initialization(Init& init, bool gui) {
             .allow_any_gpu_device_type(false)
             .prefer_gpu_device_type(vkb::PreferredDeviceType::discrete)
             .add_required_extension(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME)
+            .add_required_extension("VK_KHR_pipeline_executable_properties")
+            .add_required_extension_features(pipeline_exec_properties_features)
             .require_present(false)
             .select(vkb::DeviceSelectionMode::only_fully_suitable);
     if (!phys_device_ret) {
@@ -312,6 +319,48 @@ int create_render_pass(Init& init, RenderData& data) {
     return 0;
 }
 
+static void print_pipeline_stats(Init& init, VkPipeline pipeline, uint32_t executable_idx) {
+    VkPipelineExecutableInfoKHR info = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_EXECUTABLE_INFO_KHR,
+        .pNext = nullptr,
+        .pipeline = pipeline,
+        .executableIndex = executable_idx
+    };
+    VkPipelineExecutableStatisticKHR stats[128];
+    uint32_t num_stats = 128;
+    for (int i = 0; i < num_stats; i++) {
+        stats[i] = {};
+        stats[i].sType = VK_STRUCTURE_TYPE_PIPELINE_EXECUTABLE_STATISTIC_KHR;
+        stats[i].pNext = nullptr;
+    }
+    VK_CHECK(init.disp.getPipelineExecutableStatisticsKHR(&info, &num_stats, stats));
+
+    for (uint32_t i = 0; i < num_stats; i++) {
+        printf("%s\n%s: ", stats[i].description, stats[i].name);
+        switch (stats[i].format) {
+            case VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_BOOL32_KHR:
+                if (stats[i].value.b32) { printf("TRUE"); } else { printf("FALSE"); }
+                break;
+
+            case VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_INT64_KHR:
+                printf("%li", stats[i].value.i64);
+                break;
+
+            case VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_UINT64_KHR:
+                printf("%lu", stats[i].value.u64);
+                break;
+
+            case VK_PIPELINE_EXECUTABLE_STATISTIC_FORMAT_FLOAT64_KHR:
+                printf("%lf", stats[i].value.f64);
+                break;
+
+            default:
+                abort();
+        }
+        printf("\n\n");
+    }
+}
+
 
 int create_graphics_pipeline(Init& init, RenderData& data) {
     auto vert_code = readFile("vert.spv");
@@ -459,10 +508,16 @@ int create_graphics_pipeline(Init& init, RenderData& data) {
     pipeline_info.renderPass = data.render_pass;
     pipeline_info.subpass = 0;
     pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
+    pipeline_info.flags = VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR;
 
     if (init.disp.createGraphicsPipelines(VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &data.graphics_pipeline) != VK_SUCCESS) {
         std::cout << "failed to create pipline\n";
         return -1; // failed to create graphics pipeline
+    }
+
+    {
+        puts("=== Graphics pipeline statistics ===");
+        print_pipeline_stats(init, data.graphics_pipeline, 1);
     }
 
     init.disp.destroyShaderModule(frag_module, nullptr);
@@ -497,7 +552,7 @@ Pipeline create_culling_pipeline(Init& init, RenderData& render_data, const char
     VkComputePipelineCreateInfo pipeline_info =  {
             .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
             .pNext = nullptr,
-            .flags = 0,
+            .flags = VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR,
             .stage = {
                     .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                     .pNext = nullptr,
@@ -511,6 +566,11 @@ Pipeline create_culling_pipeline(Init& init, RenderData& render_data, const char
             .basePipelineIndex = -1
     };
     VK_CHECK(vkCreateComputePipelines(init.device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &pipeline.pipe));
+
+    {
+        puts("=== Culling pipeline statistics ===");
+        print_pipeline_stats(init, pipeline.pipe, 0);
+    }
 
     return pipeline;
 }
