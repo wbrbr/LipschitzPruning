@@ -309,7 +309,10 @@ int main(int argc, char** argv) {
 
 
         ImGui::SeparatorText("Render");
-        ImGui::Combo("Shading mode", &ctx.render_data.shading_mode, "Shaded\0Heatmap\0Normals\0AO\0");
+        if (ImGui::Combo("Shading mode", &ctx.render_data.shading_mode, "Shaded\0Heatmap\0Normals\0AO\0")) {
+            ctx.init.disp.destroyPipeline(ctx.render_data.graphics_pipeline, nullptr);
+            create_graphics_pipeline(ctx.init, ctx.render_data);
+        }
         if (ctx.render_data.shading_mode == SHADING_MODE_HEATMAP) {
             ImGui::SliderInt("Colormap max", &ctx.render_data.colormap_max, 1, 64);
         }

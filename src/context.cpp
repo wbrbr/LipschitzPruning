@@ -379,11 +379,29 @@ int create_graphics_pipeline(Init& init, RenderData& data) {
     vert_stage_info.module = vert_module;
     vert_stage_info.pName = "main";
 
+    struct SpecializationConstants {
+        int shading_mode;
+    };
+    SpecializationConstants spec_constants = { data.shading_mode };
+
     VkPipelineShaderStageCreateInfo frag_stage_info = {};
     frag_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     frag_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
     frag_stage_info.module = frag_module;
     frag_stage_info.pName = "main";
+
+    VkSpecializationMapEntry map_entry = {
+        .constantID = 0,
+        .offset = offsetof(SpecializationConstants, shading_mode),
+        .size = sizeof(SpecializationConstants::shading_mode)
+    };
+    VkSpecializationInfo frag_spec_info = {
+        .mapEntryCount = 1,
+        .pMapEntries = &map_entry,
+        .dataSize = sizeof(SpecializationConstants),
+        .pData = &spec_constants
+    };
+    frag_stage_info.pSpecializationInfo = &frag_spec_info;
 
     VkPipelineShaderStageCreateInfo shader_stages[] = { vert_stage_info, frag_stage_info };
 
@@ -831,7 +849,6 @@ void set_push_constants(RenderData& data, int grid_lvl, bool first_lvl) {
     data.push_constants.aabb_min = glm::vec4(data.aabb_min, 0);
     data.push_constants.aabb_max = glm::vec4(data.aabb_max, 0);
     data.push_constants.viz_max = (float)data.colormap_max;
-    data.push_constants.shading_mode = data.shading_mode;
     data.push_constants.mvp_ref = data.mvp_buffer.address;
     data.push_constants.culling_enabled = data.culling_enabled;
     data.push_constants.num_samples = (uint8_t)data.num_samples;

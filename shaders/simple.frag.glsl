@@ -1,6 +1,7 @@
 #version 450 core
 #include "extensions.glsl"
 layout (location = 0) out vec4 outColor;
+layout(constant_id = 0) const int shading_mode = 0;
 
 #include "../include/constants.h"
 #include "common.glsl"
@@ -34,7 +35,6 @@ layout(push_constant) uniform PushConstant {
     int first_lvl;
     float max_rel_err;
     float viz_max;
-    int shading_mode;
     float alpha;
     int culling_enabled;
     float gamma;

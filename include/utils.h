@@ -68,7 +68,6 @@ struct PushConstants {
     int first_lvl;
     float max_rel_err = 0;
     float viz_max;
-    int shading_mode;
     float alpha;
     int culling_enabled;
     float gamma;
