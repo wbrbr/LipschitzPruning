@@ -960,6 +960,48 @@ int draw_frame(Init& init, RenderData& data, bool gui) {
 
         vkCmdWriteTimestamp(data.command_buffers[i], VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, data.query_pool, 1);
 
+        // Run brick bake pipeline before we clear GPU buffers
+        if (data.bake_requested && data.culling_enabled && data.hierarchy_enabled && data.compute_culling) {
+            VkCommandBuffer cmd = data.command_buffers[i];
+            vkCmdFillBuffer(cmd, data.brick_count_buffer.buf, 0, sizeof(int), 0);
+
+            //...
+            pipeline_barrier(cmd, 
+                VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_TRANSFER_BIT, 
+                VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+                VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT);
+
+            float voxel_size = (data.aabb_max.x - data.aabb_min.x) / 512.f;
+            BrickBakePushConstants pc {
+                .aabb_min = glm::vec4(data.aabb_min, 0),
+                .prims_ref = data.prims_buffer.address,
+                .binary_ops_ref = data.binary_ops_buffer.address,
+                .nodes_ref = data.nodes_buffer.address,
+                .active_nodes_out_ref = data.active_nodes_buffer[data.output_idx].address,
+                .cells_offset_ref = data.cell_offsets_buffer[data.output_idx].address,
+                .cells_num_active_ref = data.num_active_buffer[data.output_idx].address,
+                .cell_error_out_ref = data.cell_errors[data.output_idx].address,
+                .brick_cells_num_active_ref = data.num_active_buffer[data.input_idx].address,
+                .brick_cnt_ref = data.brick_count_buffer.address,
+                .out_morton_ref = data.brick_morton_buffer.address,
+                .out_aabb_ref = data.brick_aabb_buffer.address,
+                .out_samples_ref = data.brick_sample_buffer.address,
+                .voxel_size = voxel_size,
+                .band = 2.f * sqrtf(3.f) * voxel_size,
+                .max_bricks = MAX_BRICKS,
+                .total_num_nodes = data.push_constants.num_nodes
+            };
+
+            vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, data.brick_bake_pipeline.pipe);
+            vkCmdPushConstants(cmd, data.brick_bake_pipeline.layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pc), &pc);
+            vkCmdDispatch(cmd, 64, 64, 64); // TODO- optimize? 64^3 workgroups
+            data.bake_recorded = true;
+        }
+
+
+
+
         pipeline_barrier(data.command_buffers[i], VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_STORAGE_READ_BIT);
 
         {
@@ -1680,6 +1722,17 @@ void Context::initialize(bool gui, int final_grid_lvl) {
     if (0 != create_sync_objects(init, render_data)) abort();
     create_query_pool(init, render_data);
 
+    // Create brick baking pipeline
+    render_data.brick_bake_pipeline = create_compute_pipeline(init, "brick_bake.comp.spv", "brick_bake.comp.glsl", sizeof(BrickBakePushConstants));
+    VkBufferUsageFlags brick_usage = VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | 
+                                     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | 
+                                     VK_BUFFER_USAGE_TRANSFER_DST_BIT | 
+                                     VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    render_data.brick_count_buffer = create_buffer(init, render_data, sizeof(int), brick_usage, "brick_count");
+    render_data.brick_morton_buffer = create_buffer(init, render_data, MAX_BRICKS * sizeof(uint32_t), brick_usage, "brick_morton");
+    render_data.brick_aabb_buffer = create_buffer(init, render_data, MAX_BRICKS * 6 * sizeof(float), brick_usage, "brick_aabb");
+    render_data.brick_sample_buffer = create_buffer(init, render_data, MAX_BRICKS * WORDS_PER_BRICK * sizeof(uint32_t), brick_usage, "brick_samples");
+
     VkBufferUsageFlags buffer_usage = VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     render_data.mvp_buffer = create_buffer(init, render_data, sizeof(glm::mat4), buffer_usage, "mvp_buffer");
     render_data.cam_buffer = create_buffer(init, render_data, sizeof(glm::vec4)*4, buffer_usage, "cam_buffer");
@@ -1789,6 +1842,18 @@ Timings Context::render(glm::vec3 cam_position, glm::vec3 cam_target) {
     }
 
     draw_frame(init, render_data, gui);
+
+    if (render_data.bake_recorded) {
+        int n=0;
+        CopyBuffer(render_data, init, render_data.brick_count_buffer, 
+            render_data.staging_buffer, sizeof(int));
+        TransferFromBuffer(render_data.alloc, render_data.staging_buffer, &n, sizeof(int));
+        render_data.baked_brick_count = n;
+        render_data.bake_requested = false;
+        render_data.bake_recorded = false;
+
+        export_bricks(init, render_data, "test.bricks");
+    }
 
     return {
         .culling_elapsed_ms = render_data.culling_elapsed_ms,

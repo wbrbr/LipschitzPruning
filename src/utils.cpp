@@ -298,3 +298,47 @@ BinaryOp::BinaryOp(float k, bool sign, unsigned int op) {
 
     blend_factor_and_sign = x;
 }
+
+void export_bricks(Init& init, RenderData& rd, const char* path) {
+    int n = rd.baked_brick_count;
+    if (n > MAX_BRICKS) {
+        fprintf(stderr, "Brick count %d above MAX_BRICKS, clamping!\n", n);
+        n = MAX_BRICKS;
+    }
+    // staging_buffer is 64 MB, so N * 736 must fit
+    assert((size_t)n * WORDS_PER_BRICK * 4 <= 4u * 4096 * 4096);
+
+    std::vector<uint32_t> mortons(n);
+    std::vector<float> aabbs((size_t)n * 6);
+    std::vector<uint8_t> raw((size_t)n * WORDS_PER_BRICK * 4);
+
+    CopyBuffer(rd, init, rd.brick_morton_buffer, rd.staging_buffer, n * sizeof(uint32_t));
+    TransferFromBuffer(rd.alloc, rd.staging_buffer, mortons.data(), n * sizeof(uint32_t));
+    CopyBuffer(rd, init, rd.brick_aabb_buffer, rd.staging_buffer, n * 6 * sizeof(float));
+    TransferFromBuffer(rd.alloc, rd.staging_buffer, aabbs.data(), n * 6 * sizeof(float));
+    CopyBuffer(rd, init, rd.brick_sample_buffer, rd.staging_buffer, (int)raw.size());
+    TransferFromBuffer(rd.alloc, rd.staging_buffer, raw.data(), (int)raw.size());
+
+    // repack 736-byte GPU stride down to the file's 729
+    std::vector<int8_t> samples((size_t)n * 729);
+    for (int i = 0; i < n; i++) {
+        memcpy(&samples[(size_t)i * 729], &raw[(size_t)i * WORDS_PER_BRICK * 4], 729);
+    }
+
+    uint32_t count = (uint32_t)n;
+    float domain_min[3] = { rd.aabb_min.x, rd.aabb_min.y, rd.aabb_min.z };
+    float voxel = (rd.aabb_max.x - rd.aabb_min.x) / 512.f;
+    float band = 2.f * sqrtf(3.f) * voxel;
+
+    FILE* f = fopen(path, "wb");
+    if (!f) { fprintf(stderr, "cannot open %s\n", path); return; }
+    fwrite(&count, 4, 1, f);
+    fwrite(domain_min, 4, 3, f);
+    fwrite(&voxel, 4, 1, f);
+    fwrite(&band, 4, 1, f);
+    fwrite(mortons.data(), 4, n, f);
+    fwrite(aabbs.data(), 4, (size_t)n * 6, f);
+    fwrite(samples.data(), 1, samples.size(), f);
+    fclose(f);
+    printf("wrote %s: %d bricks\n", path, n);
+}

@@ -11,8 +11,20 @@
 #include <filesystem>
 
 int create_scene(std::vector<CSGNode>& csg_tree, const std::string& input_path, glm::vec3& aabb_min, glm::vec3& aabb_max) {
+    // Clear prev scene
     csg_tree.clear();
+
+    // Load in new scene
     load_json(input_path.c_str(), csg_tree, aabb_min, aabb_max);
+
+    // Pad to 512^3 for cubic voxels
+    // No more non-cubic cells
+    glm::vec3 extent = aabb_max - aabb_min;
+    glm::vec3 center = 0.5f * (aabb_min + aabb_max);
+    float half = 0.5f * std::max(extent.x, std::max(extent.y, extent.z));
+    aabb_min = center - glm::vec3(half);
+    aabb_max = center + glm::vec3(half);
+
     int root_idx = 0;
     return root_idx;
 }
@@ -153,6 +165,11 @@ int main(int argc, char** argv) {
             int root_idx = create_scene(csg_tree, input_file, ctx.render_data.aabb_min, ctx.render_data.aabb_max);
             ctx.upload(csg_tree, root_idx);
         }
+        if (ImGui::Button("Save Bricks")) {
+            ctx.render_data.bake_requested = true;
+        }
+        ImGui::Text("Bricks: %d", ctx.render_data.baked_brick_count);
+
         ImGui::SliderFloat3("AABB min", &ctx.render_data.aabb_min[0], -3, 0);
         ImGui::SliderFloat3("AABB max", &ctx.render_data.aabb_max[0], 0, 3);
         ImGui::Text("Num nodes: %d", num_nodes);

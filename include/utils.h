@@ -74,6 +74,28 @@ struct PushConstants {
     int num_samples;
 };
 
+// See brick_bake.comp.glsl for var descs
+struct BrickBakePushConstants {
+    glm::vec4 aabb_min;
+    uint64_t prims_ref;
+    uint64_t binary_ops_ref;
+    uint64_t nodes_ref;
+    uint64_t active_nodes_out_ref;
+    uint64_t cells_offset_ref;
+    uint64_t cells_num_active_ref;
+    uint64_t cell_error_out_ref;
+    uint64_t brick_cells_num_active_ref;
+    uint64_t brick_cnt_ref;
+    uint64_t out_morton_ref;
+    uint64_t out_aabb_ref;
+    uint64_t out_samples_ref;
+    float voxel_size;
+    float band;
+    int max_bricks;
+    int total_num_nodes;
+};
+static_assert(sizeof(BrickBakePushConstants) == 128);
+
 struct Buffer {
     VkBuffer buf;
     VmaAllocation alloc;
@@ -119,6 +141,8 @@ struct RenderData {
 
     Pipeline fxaa_pipeline;
 
+    Pipeline brick_bake_pipeline;
+
     VkCommandPool command_pool;
     std::vector<VkCommandBuffer> command_buffers;
 
@@ -150,6 +174,11 @@ struct RenderData {
     Buffer tmp_buffer;
     Buffer mvp_buffer;
     Buffer cam_buffer;
+    
+    Buffer brick_count_buffer;
+    Buffer brick_morton_buffer;
+    Buffer brick_aabb_buffer;
+    Buffer brick_sample_buffer;
 
     int input_idx = 0;
     int output_idx = 1;
@@ -176,6 +205,10 @@ struct RenderData {
     bool compute_culling = true;
     glm::vec3 sphere_albedo = glm::vec3(1,0,1);
     glm::vec3 background_color = glm::vec3(1);
+
+    bool bake_requested = false; // bake button in gui
+    bool bake_recorded = false;
+    int baked_brick_count = 0;
 };
 
 enum PrimitiveType {
@@ -257,6 +290,8 @@ void CopyImageToBuffer(const RenderData& render_data, const Init& init, VkImage 
 uint64_t GetBufferAddress(const Init& init, const Buffer& buffer);
 Pipeline create_compute_pipeline(Init& init, const char* shader_path, const char* shader_name, unsigned int push_constant_size);
 Buffer create_buffer(Init& init, RenderData& render_data, unsigned int size, VkBufferUsageFlags usage, const char* name);
+void export_bricks(Init& init, RenderData& rd, const char* path);
+
 
 extern size_t g_memory_usage;
 
