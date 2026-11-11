@@ -11,8 +11,20 @@
 #include <filesystem>
 
 int create_scene(std::vector<CSGNode>& csg_tree, const std::string& input_path, glm::vec3& aabb_min, glm::vec3& aabb_max) {
+    // Clear prev scene
     csg_tree.clear();
+
+    // Load in new scene
     load_json(input_path.c_str(), csg_tree, aabb_min, aabb_max);
+
+    // Pad to 512^3 for cubic voxels
+    // No more non-cubic cells
+    glm::vec3 extent = aabb_max - aabb_min;
+    glm::vec3 center = 0.5f * (aabb_min + aabb_max);
+    float half = 0.5f * std::max(extent.x, std::max(extent.y, extent.z));
+    aabb_min = center - glm::vec3(half);
+    aabb_max = center + glm::vec3(half);
+
     int root_idx = 0;
     return root_idx;
 }
