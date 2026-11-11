@@ -1851,6 +1851,8 @@ Timings Context::render(glm::vec3 cam_position, glm::vec3 cam_target) {
         render_data.baked_brick_count = n;
         render_data.bake_requested = false;
         render_data.bake_recorded = false;
+
+        export_bricks(init, render_data, "test.bricks");
     }
 
     return {
