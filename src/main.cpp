@@ -165,6 +165,11 @@ int main(int argc, char** argv) {
             int root_idx = create_scene(csg_tree, input_file, ctx.render_data.aabb_min, ctx.render_data.aabb_max);
             ctx.upload(csg_tree, root_idx);
         }
+        if (ImGui::Button("Save Bricks")) {
+            ctx.render_data.bake_requested = true;
+        }
+        ImGui::Text("Bricks: %d", ctx.render_data.baked_brick_count);
+
         ImGui::SliderFloat3("AABB min", &ctx.render_data.aabb_min[0], -3, 0);
         ImGui::SliderFloat3("AABB max", &ctx.render_data.aabb_max[0], 0, 3);
         ImGui::Text("Num nodes: %d", num_nodes);

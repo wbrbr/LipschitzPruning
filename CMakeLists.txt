@@ -38,13 +38,15 @@ set(SHADER_SRCS
         culling.comp.glsl
         plane.vert.glsl
         plane.frag.glsl
-        dense_eval.comp.glsl)
+        dense_eval.comp.glsl
+        brick_bake.comp.glsl)
 set(SHADER_STAGES
         vert
         frag
         comp
         vert
         frag
+        comp
         comp)
 set(SHADER_BINS
         vert.spv
@@ -52,7 +54,8 @@ set(SHADER_BINS
         culling.comp.spv
         plane.vert.spv
         plane.frag.spv
-        dense_eval.comp.spv)
+        dense_eval.comp.spv
+        brick_bake.comp.spv)
 
 set(SHARED_SRC
         src/utils.cpp
